@@ -33,12 +33,14 @@ const NavBar = () => {
                         <span className="mdi mdi-chart-bar"/>
                         Overview
                     </NavLink>
-                    { /* <NavLink className="navbar-item" to="/login">
+                    <NavLink className="navbar-item" to="/login">
+                        <span className="mdi mdi-account-outline"/>
                         Login
                     </NavLink>
-                        <NavLink className="navbar-item" to="/register">
+                    <NavLink className="navbar-item" to="/register">
+                        <span className="mdi mdi-account-plus-outline"/>
                         Register
-                        </NavLink> */ }
+                    </NavLink>
                 </div>
             </div>
         </nav>

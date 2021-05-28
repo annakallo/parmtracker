@@ -8,6 +8,7 @@ import (
 	"github.com/annakallo/parmtracker/log"
 	"github.com/annakallo/parmtracker/server"
 	"github.com/annakallo/parmtracker/settings"
+	"github.com/annakallo/parmtracker/users"
 	"net/http"
 )
 
@@ -26,6 +27,7 @@ func UpdateTablesVersion() {
 	settings.UpdateSettingsTable()
 	categories.UpdateCategoriesTable()
 	expenses.UpdateExpensesTable()
+	users.UpdateUsersTable()
 }
 
 func main() {
