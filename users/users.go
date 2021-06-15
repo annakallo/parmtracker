@@ -41,6 +41,31 @@ func (user *User) Load(id int) error {
 	return nil
 }
 
+// Load user by username
+func (user *User) LoadByUsername(username string) error {
+	db := mysql.GetInstance().GetConn()
+	stmt, _ := db.Prepare(`select * from users where username = ?`)
+	defer stmt.Close()
+	rows, e := stmt.Query(username)
+	if e != nil {
+		log.GetInstance().Errorf(LogPrefix, "Error when preparing stmt username %d: %s", username, e.Error())
+		return e
+	}
+	defer rows.Close()
+	if rows.Next() {
+		var createdAt string
+		var updatedAt string
+		e := rows.Scan(&user.Id, &user.Username, &user.Password, &createdAt, &updatedAt)
+		if e != nil {
+			log.GetInstance().Errorf(LogPrefix, "Error when loading username %v: %s", username, e.Error())
+			return e
+		}
+		user.CreatedAt, _ = time.Parse(mysql.MysqlDateFormat, createdAt)
+		user.UpdatedAt, _ = time.Parse(mysql.MysqlDateFormat, updatedAt)
+	}
+	return nil
+}
+
 // Insert a new user
 func (user *User) Insert() error {
 	if user.CreatedAt.IsZero() {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/annakallo/parmtracker/data/categories"
 	"github.com/annakallo/parmtracker/data/expenses"
+	"github.com/annakallo/parmtracker/users"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -223,4 +224,93 @@ func EntryDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
+}
+
+// UserNew is a handler for: /api/users
+func UserNew(w http.ResponseWriter, r *http.Request) {
+	var user users.User
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	if err := r.Body.Close(); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	if err := json.Unmarshal(body, &user); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(422) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			fmt.Printf("Error: %s\n", err)
+			return
+		}
+	}
+	err = user.Insert()
+	if err != nil {
+		if err.Error()[:28] == "Error 1062: Duplicate entry " {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(422) // unprocessable entity
+			if err := json.NewEncoder(w).Encode(`User already registered.`); err != nil {
+				fmt.Printf("Error: %s\n", err)
+				return
+			}
+		}
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Authorization", user.Password)
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(user.Username); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+}
+
+// UserAuth is a handler for: /api/auth
+func UserAuth(w http.ResponseWriter, r *http.Request) {
+	var user users.User
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	if err := r.Body.Close(); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	if err := json.Unmarshal(body, &user); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(422) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			fmt.Printf("Error: %s\n", err)
+			return
+		}
+	}
+	err = user.LoadByUsername(user.Username)
+	if user.Id == 0 {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(400) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			fmt.Printf("Error: %s\n", err)
+			return
+		}
+	}
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(400) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			fmt.Printf("Error: %s\n", err)
+			return
+		}
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode("bumm"); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
 }

@@ -24,4 +24,6 @@ var routes = Routes{
 	Route{"Categories", http.MethodGet, "/api/categories", api.Categories},
 	Route{"CategoryNew", http.MethodPost, "/api/categories", api.CategoryNew},
 	Route{"CategoryDelete", http.MethodDelete, "/api/categories/{id}", api.CategoryDelete},
+	Route{"UserNew", http.MethodPost, "/api/users", api.UserNew},
+	Route{"UserAuth", http.MethodPost, "/api/auth", api.UserAuth},
 }
